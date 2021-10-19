@@ -3,13 +3,16 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
+    <tab-control class="tab" :titles="titles" @tabClick="tabClick"
+                  ref="tabControl1"  v-show="isTabFixed"></tab-control>
     <scroll class="content" ref="scroll" :probe-type="3"
             @scroll="contentScroll"
-            @pullingUp="loadMore" >
-      <home-swiper :banners="banners"></home-swiper>
+            @pullingUp="loadMore">
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
       <feature-view></feature-view>
-      <tab-control class="tab-control" :titles="titles" @tabClick="tabClick"></tab-control>
+      <tab-control  :titles="titles" @tabClick="tabClick"
+                    ref="tabControl" ></tab-control>
       <goods-list :goods="goods[currentType].list"/>
     </scroll>
     <back-top @click.native="backClick" v-show="isBackTop" />
@@ -42,7 +45,7 @@
       TabControl,
       GoodsList,
       Scroll,
-      BackTop
+      BackTop,
     },
     data(){
       return {
@@ -55,7 +58,11 @@
           'sell':{page:0,list:[]},
         },
         currentType:'pop',
-        isBackTop:false
+        isBackTop:false,
+        tabOffsetTop:0,
+        isTabFixed:false,
+        saveY:0,
+        iid:0
       }
     },
     created(){
@@ -68,8 +75,17 @@
       this.getHomeGoods('sell')
 
     },
+    mounted(){
+      this.$refs.tabControl.$el.offsetTop
+    },
+    activated() {
+      this.$refs.scroll.scrollTo(0,this.saveY,0)
+      this.$refs.scroll.refresh()
+    },
+    deactivated() {
+      this.saveY = this.$refs.scroll.scroll.y
+    },
     methods:{
-
       /**
        * 事件监听相关的方法
        * */
@@ -85,6 +101,8 @@
             this.currentType = 'sell'
             break
         }
+        this.$refs.tabControl1.itemindex = index;
+        this.$refs.tabControl.itemindex = index;
       },
 
       backClick(){
@@ -94,11 +112,18 @@
       },
       contentScroll(position){
         this.isBackTop = ( -position.y ) >1000?true:false
+
+        this.isTabFixed = (-position.y) > this.tabOffsetTop
+
       },
       loadMore(){
         // console.log('上啦加载更多');
         this.getHomeGoods(this.currentType);
         this.$refs.scroll.scroll.refresh();
+      },
+      swiperImageLoad(){
+        // console.log(this.$refs.tabControl.$el.offsetTop);
+        this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
       },
 
       /**
@@ -121,6 +146,7 @@
 
           this.$refs.scroll.finishPullUp()
         })
+        // this.$refs.scroll.refresh();
       },
 
     }
@@ -129,7 +155,7 @@
 
 <style scoped>
   #home{
-    padding-top: 44px;
+    /*padding-top: 44px;*/
     height: 100vh;
     position: relative;
   }
@@ -138,20 +164,21 @@
     background-color: var(--color-tint);
     color: white;
 
-    position: fixed;
-    left: 0;
-    right:0;
-    top:0;
-    z-index: 9;
+    /*原生滚动使用*/
+    /*position: fixed;*/
+    /*left: 0;*/
+    /*right:0;*/
+    /*top:0;*/
+    /*z-index: 9;*/
   }
 
-  /**top必须设置**/
-  .tab-control{
-    position: sticky;
-    top: 44px;
-    background-color: white;
-    z-index: 9;
-  }
+  /*!**top必须设置**!*/
+  /*.tab-control{*/
+  /*  position: sticky;*/
+  /*  top: 44px;*/
+  /*  background-color: white;*/
+  /*  z-index: 9;*/
+  /*}*/
 
   /*.content{*/
   /*  height: calc(100vh - 93);*/
@@ -168,5 +195,10 @@
     bottom: 49px;
     left:0;
     right:0;
+  }
+  .tab{
+    position: relative;
+    z-index:9;
+    background-color: white;
   }
 </style>

@@ -32,8 +32,10 @@
         click:true,
         tap:true,
         mouseWheel:true,
-        // observeDOM: true,
-        // observeImage: true,
+
+        observeDOM: true,
+        observeImage: true,
+
         probeType:this.probeType,
         pullUpLoad:this.pullUpLoad
       })
@@ -55,6 +57,9 @@
       },
       finishPullUp(){
         this.scroll.finishPullUp()
+      },
+      refresh(){
+        this.scroll.refresh()
       }
     }
   }

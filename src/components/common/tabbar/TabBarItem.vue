@@ -14,7 +14,7 @@
       path: String,
       activeColor: {
         type: String,
-        default: 'red'
+        default: 'var(--color-tint)'
       }
     },
     data() {
@@ -36,7 +36,7 @@
     },
     methods: {
       itemClick() {
-        this.$router.replace(this.path)
+        this.$router.replace(this.path).catch(err => err)
       }
     }
   }
